@@ -29,11 +29,11 @@ Set up [Distillery](https://github.com/bitwalker/distillery/) and add to config 
 
 ## Configuration
 
-Configure [Vaultex](https://github.com/findmypast/vaultex) with correct vault address and credentials. The Vault address can be set from the system environment or application environment.
+Read the [Vaultex docs](https://github.com/findmypast/vaultex), and configure vaultex with your vault address and credentials. The Vault address can be set from the system environment or application environment.
 
-VaultConfigProvider assumes vault auth credentials are set in previous config providers. 
+VaultConfigProvider assumes vault auth credentials are already set in application environment by earlier config providers. 
 
-With the standard `Mix.Releases.Config.Providers.Elixir`:
+For instance, the standard `Mix.Releases.Config.Providers.Elixir` should be configured something like so:
 
 ```elixir
 config :vaultex,
@@ -46,34 +46,19 @@ config :vaultex,
 
 ## Usage
 
-The provider will resolve secrets stored matching two patterns:
-
-In a string
-
-```
-scheme:#{path} key=#{key_name}
-```
-
-In a keyword list 
-
-```elixir
-config :xandra, Xandra,
-  nodes: [
-    path: "secret/services/cassandra", 
-    key: "nodes", 
-    fun: &String.split(&1, ",")
-  ]
-```
-
+The provider will resolve secrets stored matching two patterns srtings or keyword lists. Keyword lists can contain transformations
 
 ```elixir
 config :my_app,
-  # with a string
   username: "secret:secret/services/my_app key=username",
 
   username: [
     path: "secret/services/my_app",
     key: "username",
-    fun: fn v -> v end
+    fun: &transform/1
   ],
 ```
+
+A string address is expected to include `secret:/path` and `key=key_name`.
+
+A keyword address must contain the keys `key` and `path` it also accepts an optional `fun` argument which can be used for transformations on returned values. 
