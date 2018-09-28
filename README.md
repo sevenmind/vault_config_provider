@@ -2,7 +2,7 @@
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/vault_config_provider.svg?style=flat)](https://hex.pm/packages/vault_config_provider)
 
-VaultConfigProvider is an Elixir Distillery release config provider for loading vault secrets into app env at runtime. 
+VaultConfigProvider is an Elixir Distillery release config provider for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime. 
 
 Built with [Distillery](https://hexdocs.pm/distillery/home.html) and [Vaultex](https://github.com/findmypast/vaultex)
 
