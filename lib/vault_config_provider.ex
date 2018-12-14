@@ -104,5 +104,7 @@ defmodule VaultConfigProvider do
     {key, Enum.map(val, &eval_secret/1)}
   end
 
+  defp eval_secret(val) when is_list(val), do: Enum.map(val, &eval_secret/1)
+
   defp eval_secret(other), do: other
 end
