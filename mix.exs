@@ -9,7 +9,12 @@ defmodule VaultConfigProvider.MixProject do
       start_permanent: Mix.env() == :prod,
       description: "distillery config provider to read vault secrets",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      name: "VaultConfigProvider",
+      docs: [
+        main: "VaultConfigProvider",
+        extras: ["README.md"]
+      ]
     ]
   end
 
