@@ -1,11 +1,11 @@
 defmodule VaultConfigProvider do
   @moduledoc """
-  VaultConfigProvider is a
+  VaultConfigProvider is a [Distillery Config provider](https://hexdocs.pm/distillery/config/runtime.html#config-providers).
 
   This provider expects a path to a config file to load during boot as an argument:
       set config_providers: [
         {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/config.exs"]},
-        {VaultConfigProvider}
+        {VaultConfigProvider, []}
       ]
 
   The above configuration goes in a `release` or `environment` definition in `rel/congfig.exs`,
@@ -16,7 +16,7 @@ defmodule VaultConfigProvider do
 
   This provider is based on `Mix.Releases.Config.Providers.Elixir` in `Distillery` 2.0.9
 
-  This provider exects the passed config file to contain configuration for Vault describing authentication parameters:
+  This provider expects the passed config file to contain configuration for Vault describing authentication parameters:
 
     config :vaultex,
       auth: {:kubernetes, %{jwt: File.read!("/tmp/token"), role: "my_role"}}

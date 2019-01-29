@@ -2,7 +2,7 @@
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/vault_config_provider.svg?style=flat)](https://hex.pm/packages/vault_config_provider)
 
-VaultConfigProvider is an Elixir Distillery release config provider for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime. 
+VaultConfigProvider is an Elixir Distillery release config provider for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime.
 
 Built with [Distillery](https://hexdocs.pm/distillery/home.html) and [Vaultex](https://github.com/findmypast/vaultex)
 
@@ -31,7 +31,7 @@ Set up [Distillery](https://github.com/bitwalker/distillery/) and add to config 
 
 Read the [Vaultex docs](https://github.com/findmypast/vaultex), and configure vaultex with your vault address and credentials. The Vault address can be set from the system environment or application environment.
 
-VaultConfigProvider assumes vault auth credentials are already set in application environment by earlier config providers. 
+VaultConfigProvider assumes vault auth credentials are already set in application environment by earlier config providers.
 
 For instance, the standard `Mix.Releases.Config.Providers.Elixir` should be configured something like so:
 
@@ -46,7 +46,7 @@ config :vaultex,
 
 ## Usage
 
-The provider will resolve secrets stored matching two patterns srtings or keyword lists. Keyword lists can contain transformations
+The provider will resolve secrets stored matching two patterns: strings or keyword lists. Keyword lists can contain transformations.
 
 ```elixir
 config :my_app,
@@ -61,4 +61,4 @@ config :my_app,
 
 A string address is expected to include `secret:/path` and `key=key_name`.
 
-A keyword address must contain the keys `key` and `path` it also accepts an optional `fun` argument which can be used for transformations on returned values. 
+A keyword address must contain the keys `key` and `path` it also accepts an optional `fun` argument which can be used for transformations on returned values.
