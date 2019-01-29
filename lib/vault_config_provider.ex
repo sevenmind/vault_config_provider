@@ -16,13 +16,21 @@ defmodule VaultConfigProvider do
 
   This provider is based on `Mix.Releases.Config.Providers.Elixir` in `Distillery` 2.0.9
 
-  This provider expects the passed config file to contain configuration for Vault describing authentication parameters:
+  This provider expects the passed config file to contain configuration for `Vaultex.Client.auth/3` describing authentication parameters:
 
-    config :vaultex,
-      auth: {:kubernetes, %{jwt: File.read!("/tmp/token"), role: "my_role"}}
+      # using kubernetes auth strategy
+      config :vaultex,
+        auth: {:kubernetes, %{jwt: File.read!("/tmp/token"), role: "my_role"}}
 
-    config :vaultex,
-      auth: {:token, {"root"}}
+      # or using a token strategy
+      config :vaultex,
+        auth: {:token, {"root"}}
+
+      config :vaultex,
+        auth: {:github, {"github_token"}}
+
+      config :vaultex,
+        auth: {:app_id, {"app_id", "user_id"}}
   """
 
   use Mix.Releases.Config.Provider

@@ -40,6 +40,8 @@ config :vaultex,
   auth: {:kubernetes, %{jwt: File.read!("/tmp/token"), role: "my_role"}},
   vault_addr: "http://127.0.0.1"
 
+# or 
+
 config :vaultex,
   auth: {:token, {"root"}}
 ```
