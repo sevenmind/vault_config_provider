@@ -83,33 +83,33 @@ defmodule VaultConfigProvider do
     Vaultex.Client.read(path, method, credentials)
   end
 
-  defp resolve_secrets(runtime_config) do
+  def resolve_secrets(runtime_config) do
     Enum.map(runtime_config, &eval_secret(&1))
   end
 
-  defp eval_secret({key, "secret:" <> path}) do
+  defp eval_secret("secret:" <> path) do
     [path, "key=" <> vault_key] = String.split(path, " ")
 
-    eval_secret({key, [path: path, key: vault_key]})
+    eval_secret(path: path, key: vault_key)
   end
 
-  defp eval_secret({key, [path: path, key: vault_key, fun: fun]}) do
-    {^key, secret} = eval_secret({key, [path: path, key: vault_key]})
+  defp eval_secret(path: path, key: vault_key, fun: fun) do
+    secret = eval_secret(path: path, key: vault_key)
 
-    {key, fun.(secret)}
+    fun.(secret)
   end
 
-  defp eval_secret({key, [path: path, key: vault_key]}) do
+  defp eval_secret(path: path, key: vault_key) do
     with {:ok, secret} when is_map(secret) <- vault_read(path) do
-      {key, secret[vault_key]}
+      secret[vault_key]
     else
       error ->
         raise ArgumentError, "secret at #{path}##{vault_key} returned #{inspect(error)}"
     end
   end
 
-  defp eval_secret({key, val}) when is_list(val) do
-    {key, Enum.map(val, &eval_secret/1)}
+  defp eval_secret({key, val}) do
+    {key, eval_secret(val)}
   end
 
   defp eval_secret(val) when is_list(val), do: Enum.map(val, &eval_secret/1)
