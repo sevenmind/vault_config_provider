@@ -2,9 +2,9 @@
 
 [![Hex.pm Version](http://img.shields.io/hexpm/v/vault_config_provider.svg?style=flat)](https://hex.pm/packages/vault_config_provider)
 
-VaultConfigProvider is an Elixir Distillery release config provider for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime.
+VaultConfigProvider is an Elixir [release config provider](https://hexdocs.pm/elixir/Config.Provider.html) for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime.
 
-Built with [Distillery](https://hexdocs.pm/distillery/home.html) and [Vaultex](https://github.com/findmypast/vaultex)
+Built with [Vaultex](https://github.com/findmypast/vaultex)
 
 ## Installation
 
@@ -13,17 +13,19 @@ The package can be installed by adding `vault_config_provider` to your list of d
 ```elixir
 def deps do
   [
-    {:vault_config_provider, "~> 0.1.0"}
+    {:vault_config_provider, "~> 0.2.0"}
   ]
 end
 ```
 
-Set up [Distillery](https://github.com/bitwalker/distillery/) and add to config provider to the config_providers in `rel/config.exs`.
+Configure [your release](https://hexdocs.pm/mix/Mix.Tasks.Release.html) and add VaultConfigProvider as a config provider
 
 ```
-  set config_providers: [
-    {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/etc/config.exs"]},
-    {VaultConfigProvider, []}
+def project
+  [
+    releases: [
+      config_providers: [{VaultConfigProvider, nil}]
+    ]
   ]
 ```
 
@@ -32,8 +34,6 @@ Set up [Distillery](https://github.com/bitwalker/distillery/) and add to config 
 Read the [Vaultex docs](https://github.com/findmypast/vaultex), and configure vaultex with your vault address and credentials. The Vault address can be set from the system environment or application environment.
 
 VaultConfigProvider assumes vault auth credentials are already set in application environment by earlier config providers.
-
-For instance, the standard `Mix.Releases.Config.Providers.Elixir` should be configured something like so:
 
 ```elixir
 config :vaultex,

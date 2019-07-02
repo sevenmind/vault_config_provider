@@ -4,10 +4,10 @@ defmodule VaultConfigProvider.MixProject do
   def project do
     [
       app: :vault_config_provider,
-      version: "0.1.2",
-      elixir: "~> 1.7",
+      version: "0.2.0",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      description: "distillery config provider to read vault secrets",
+      description: "release config provider to read vault secrets",
       package: package(),
       deps: deps(),
       name: "VaultConfigProvider",
@@ -28,8 +28,7 @@ defmodule VaultConfigProvider.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:vaultex, "~> 0.8"},
-      {:distillery, "~> 2.0"},
+      {:vaultex, "~> 0.11"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:mock, "~> 0.3.0", only: :test}
     ]

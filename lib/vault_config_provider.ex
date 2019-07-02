@@ -1,20 +1,15 @@
 defmodule VaultConfigProvider do
   @moduledoc """
-  VaultConfigProvider is a [Distillery Config provider](https://hexdocs.pm/distillery/config/runtime.html#config-providers).
+  VaultConfigProvider is a [release config provider](https://hexdocs.pm/elixir/Config.Provider.html).
 
   This provider expects a path to a config file to load during boot as an argument:
-      set config_providers: [
-        {Mix.Releases.Config.Providers.Elixir, ["${RELEASE_ROOT_DIR}/config.exs"]},
-        {VaultConfigProvider, []}
-      ]
+      config_providers: [{VaultConfigProvider, []}]
 
   The above configuration goes in a `release` or `environment` definition in `rel/congfig.exs`,
   and will result in the given path being expanded during boot, and evaluated using `Mix.Config`.
 
   Any value set as `"secret:secret/foo/bar key=baz"` or `[path: "secret/foo/bar", key: "baz"]`
   will be resolved from Vault.
-
-  This provider is based on `Mix.Releases.Config.Providers.Elixir` in `Distillery` 2.0.9
 
   This provider expects the passed config file to contain configuration for `Vaultex.Client.auth/3` describing authentication parameters:
 
@@ -33,74 +28,34 @@ defmodule VaultConfigProvider do
         auth: {:app_id, {"app_id", "user_id"}}
   """
 
-  use Mix.Releases.Config.Provider
+  @behaviour Config.Provider
 
-  def init(_) do
-    # Ensure VaultEx is started
-    vault_started? = app_started?(:vaultex)
+  def init(_), do: nil
 
-    unless vault_started? do
-      {:ok, _} = Application.ensure_all_started(:vaultex)
-    end
+  def load(config, _) do
+    {:ok, _} = Application.ensure_all_started(:vaultex)
 
-    try do
-      app_env()
-      |> resolve_secrets()
-      |> persist()
-    else
-      _ ->
-        :ok
-    after
-      # teardown started vaultex if started here
-      unless vault_started? do
-        :ok = Application.stop(:vaultex)
-      end
-    end
+    Config.Reader.merge(config, resolve_secrets(config))
   end
 
-  def app_env do
-    for {app, _, _} <- :application.loaded_applications() do
-      {app, :application.get_all_env(app)}
-    end
+  def resolve_secrets(config) do
+    Enum.map(config, &eval_secret(&1, config))
   end
 
-  defp persist(config) do
-    for {app, app_config} <- config do
-      for {k, v} <- app_config do
-        Application.put_env(app, k, v, persistent: true)
-      end
-    end
-
-    :ok
-  end
-
-  defp app_started?(app) do
-    List.keymember?(Application.started_applications(), app, 0)
-  end
-
-  defp vault_read(path) do
-    {method, credentials} = Application.get_env(:vaultex, :auth)
-    Vaultex.Client.read(path, method, credentials)
-  end
-
-  def resolve_secrets(runtime_config) do
-    Enum.map(runtime_config, &eval_secret(&1))
-  end
-
-  defp eval_secret("secret:" <> path) do
+  defp eval_secret("secret:" <> path, config) do
     [path, "key=" <> vault_key] = String.split(path, " ")
 
-    eval_secret(path: path, key: vault_key)
+    eval_secret([path: path, key: vault_key], config)
   end
 
-  defp eval_secret(path: path, key: vault_key, fun: fun) do
-    secret = eval_secret(path: path, key: vault_key)
+  defp eval_secret([path: path, key: vault_key, fun: fun], config) do
+    secret = eval_secret([path: path, key: vault_key], config)
 
     fun.(secret)
   end
 
-  defp eval_secret(path: path, key: vault_key) do
-    with {:ok, secret} when is_map(secret) <- vault_read(path) do
+  defp eval_secret([path: path, key: vault_key], config) do
+    with {:ok, secret} when is_map(secret) <- vault_read(path, config) do
       secret[vault_key]
     else
       error ->
@@ -108,11 +63,16 @@ defmodule VaultConfigProvider do
     end
   end
 
-  defp eval_secret({key, val}) do
-    {key, eval_secret(val)}
+  defp eval_secret({key, val}, config) do
+    {key, eval_secret(val, config)}
   end
 
-  defp eval_secret(val) when is_list(val), do: Enum.map(val, &eval_secret/1)
+  defp eval_secret(val, config) when is_list(val), do: Enum.map(val, &eval_secret(&1, config))
 
-  defp eval_secret(other), do: other
+  defp eval_secret(other, _config), do: other
+
+  defp vault_read(path, config) do
+    {method, credentials} = get_in(config, [:vaultex, :auth])
+    Vaultex.Client.read(path, method, credentials)
+  end
 end
