@@ -28,7 +28,7 @@ defmodule VaultConfigProvider.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:vaultex, "~> 0.11"},
+      {:vaultex, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:mock, "~> 0.3.0", only: :test}
     ]
