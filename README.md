@@ -1,14 +1,18 @@
 # VaultConfigProvider
 
-[![Hex.pm Version](http://img.shields.io/hexpm/v/vault_config_provider.svg?style=flat)](https://hex.pm/packages/vault_config_provider)
+[![Module Version](https://img.shields.io/hexpm/v/vault_config_provider.svg)](https://hex.pm/packages/vault_config_provider)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/vault_config_provider/)
+[![Total Download](https://img.shields.io/hexpm/dt/vault_config_provider.svg)](https://hex.pm/packages/vault_config_provider)
+[![License](https://img.shields.io/hexpm/l/vault_config_provider.svg)](https://github.com/sevenmind/vault_config_provider/blob/master/LICENSE.md)
+[![Last Updated](https://img.shields.io/github/last-commit/sevenmind/vault_config_provider.svg)](https://github.com/sevenmind/vault_config_provider/commits/master)
 
 VaultConfigProvider is an Elixir [release config provider](https://hexdocs.pm/elixir/Config.Provider.html) for loading secrets from [Vault](https://www.vaultproject.io/) into app env at runtime.
 
-Built with [Vaultex](https://github.com/findmypast/vaultex)
+Built for [Vaultex](https://github.com/findmypast/vaultex).
 
 ## Installation
 
-The package can be installed by adding `vault_config_provider` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `:vault_config_provider` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -18,9 +22,9 @@ def deps do
 end
 ```
 
-Configure [your release](https://hexdocs.pm/mix/Mix.Tasks.Release.html) and add VaultConfigProvider as a config provider
+Configure [your release](https://hexdocs.pm/mix/Mix.Tasks.Release.html) and add VaultConfigProvider as a config provider:
 
-```
+```elixir
 def project
   [
     releases: [
@@ -40,7 +44,7 @@ config :vaultex,
   auth: {:kubernetes, %{jwt: File.read!("/tmp/token"), role: "my_role"}},
   vault_addr: "http://127.0.0.1"
 
-# or 
+# or
 
 config :vaultex,
   auth: {:token, {"root"}}
@@ -64,3 +68,9 @@ config :my_app,
 A string address is expected to include `secret:/path` and `key=key_name`.
 
 A keyword address must contain the keys `key` and `path` it also accepts an optional `fun` argument which can be used for transformations on returned values.
+
+## Copyright and License
+
+Copyright (c) 2018 7Mind GmbH
+
+This library licensed under the [MIT license](./LICENSE.md).
