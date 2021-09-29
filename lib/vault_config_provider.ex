@@ -1,17 +1,20 @@
 defmodule VaultConfigProvider do
   @moduledoc """
-  VaultConfigProvider is a [release config provider](https://hexdocs.pm/elixir/Config.Provider.html).
+  VaultConfigProvider is a [release config
+  provider](https://hexdocs.pm/elixir/Config.Provider.html).
 
-  This provider expects a path to a config file to load during boot as an argument:
-      config_providers: [{VaultConfigProvider, []}]
+  This provider expects a path to a config file to load during boot as an
+      argument: config_providers: [{VaultConfigProvider, []}]
 
-  The above configuration goes in a `release` or `environment` definition in `rel/congfig.exs`,
-  and will result in the given path being expanded during boot, and evaluated using `Mix.Config`.
+  The above configuration goes in a `release` or `environment` definition in
+  `rel/congfig.exs`, and will result in the given path being expanded during
+  boot, and evaluated using `Mix.Config`.
 
-  Any value set as `"secret:secret/foo/bar key=baz"` or `[path: "secret/foo/bar", key: "baz"]`
-  will be resolved from Vault.
+  Any value set as `"secret:secret/foo/bar key=baz"`, `[path: "secret/foo/bar",
+  key: "baz"]`, or `"vault:secret/foo/bar#baz"` will be resolved from Vault.
 
-  This provider expects the passed config file to contain configuration for `Vaultex.Client.auth/3` describing authentication parameters:
+  This provider expects the passed config file to contain configuration for
+  `Vaultex.Client.auth/3` describing authentication parameters:
 
       # using kubernetes auth strategy
       config :vaultex,
@@ -43,7 +46,13 @@ defmodule VaultConfigProvider do
   end
 
   defp eval_secret("secret:" <> path, config) do
-    [path, "key=" <> vault_key] = String.split(path, " ")
+    [path, vault_key] = split_path(path)
+
+    eval_secret([path: path, key: vault_key], config)
+  end
+
+  defp eval_secret("vault:" <> path, config) do
+    [path, vault_key] = split_path(path)
 
     eval_secret([path: path, key: vault_key], config)
   end
@@ -54,12 +63,21 @@ defmodule VaultConfigProvider do
     fun.(secret)
   end
 
-  defp eval_secret([path: path, key: vault_key], config) do
+  defp eval_secret([path: path, key: vault_key], config) when is_binary(vault_key) do
     with {:ok, secret} when is_map(secret) <- vault_read(path, config) do
       secret[vault_key]
     else
       error ->
         raise ArgumentError, "secret at #{path}##{vault_key} returned #{inspect(error)}"
+    end
+  end
+
+  defp eval_secret([path: path, key: nil], config) do
+    with {:ok, secret} when is_map(secret) <- vault_read(path, config) do
+      secret
+    else
+      error ->
+        raise ArgumentError, "secret at #{path}# returned #{inspect(error)}"
     end
   end
 
@@ -74,5 +92,23 @@ defmodule VaultConfigProvider do
   defp vault_read(path, config) do
     {method, credentials} = get_in(config, [:vaultex, :auth])
     Vaultex.Client.read(path, method, credentials)
+  end
+
+  defp split_path(path) do
+    pattern = :binary.compile_pattern([" ", "#"])
+
+    if String.contains?(path, pattern) do
+      [path, key] = String.split(path, pattern)
+
+      key =
+        case key do
+          "key=" <> key -> key
+          key -> key
+        end
+
+      [path, key]
+    else
+      [path, nil]
+    end
   end
 end

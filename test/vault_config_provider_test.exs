@@ -4,7 +4,7 @@ defmodule VaultConfigProviderTest do
   import Mock
 
   setup_with_mocks([
-    {Vaultex.Client, [], [read: fn path, _method, _credentials -> {:ok, %{"key" => "ok"}} end]}
+    {Vaultex.Client, [], [read: fn _path, _method, _credentials -> {:ok, %{"key" => "ok"}} end]}
   ]) do
     :ok
   end
@@ -64,6 +64,28 @@ defmodule VaultConfigProviderTest do
                  ],
                  vaultex: [auth: {:method, :credentials}]
                )
+
+      assert [{:app, [some_key: ["ok", "ok"]]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [
+                   some_key: [
+                     "vault:secret/services/my_app#key",
+                     "vault:secret/services/my_app#key"
+                   ]
+                 ],
+                 vaultex: [auth: {:method, :credentials}]
+               )
+
+      assert [{:app, [some_key: [%{"key" => "ok"}, %{"key" => "ok"}]]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [
+                   some_key: [
+                     "vault:secret/services/my_app",
+                     "vault:secret/services/my_app"
+                   ]
+                 ],
+                 vaultex: [auth: {:method, :credentials}]
+               )
     end
 
     test "deeply nested keyword path" do
@@ -82,6 +104,34 @@ defmodule VaultConfigProviderTest do
                      ]
                    ]
                  ],
+                 vaultex: [auth: {:method, :credentials}]
+               )
+    end
+
+    test "vault-env style paths" do
+      assert [{:app, [some_key: "ok"]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [some_key: "vault:secret/services/my_app#key"],
+                 vaultex: [auth: {:method, :credentials}]
+               )
+
+      assert [{:app, [some_key: "ok"]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [some_key: "secret:secret/services/my_app#key"],
+                 vaultex: [auth: {:method, :credentials}]
+               )
+    end
+
+    test "resolves a path object into a map" do
+      assert [{:app, [some_key: %{"key" => "ok"}]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [some_key: "secret:secret/services/my_app"],
+                 vaultex: [auth: {:method, :credentials}]
+               )
+
+      assert [{:app, [some_key: %{"key" => "ok"}]} | _] =
+               VaultConfigProvider.resolve_secrets(
+                 app: [some_key: "vault:secret/services/my_app"],
                  vaultex: [auth: {:method, :credentials}]
                )
     end

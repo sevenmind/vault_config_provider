@@ -13,7 +13,7 @@ The package can be installed by adding `vault_config_provider` to your list of d
 ```elixir
 def deps do
   [
-    {:vault_config_provider, "~> 0.2.0"}
+    {:vault_config_provider, "~> 0.4.0"}
   ]
 end
 ```
@@ -52,15 +52,19 @@ The provider will resolve secrets stored matching two patterns: strings or keywo
 
 ```elixir
 config :my_app,
-  username: "secret:secret/services/my_app key=username",
+  username: "secret:secret/services/my_app key=username"
+  
+  username: "vault:secret/services/my_app#username"
 
   username: [
     path: "secret/services/my_app",
     key: "username",
-    fun: &transform/1
-  ],
+    fun: &String.upcase/1
+  ]
+
+  user_config: "secret:secret/services/my_app" # %{"key" => "username}
 ```
 
-A string address is expected to include `secret:/path` and `key=key_name`.
+A string address is expected to include `secret:/path` and `key=key_name` or `vault:path` and `#key_name`
 
-A keyword address must contain the keys `key` and `path` it also accepts an optional `fun` argument which can be used for transformations on returned values.
+A keyword address must contain the keys `key` and `path` and may contain optional `fun` function which will be applied to any returned values
