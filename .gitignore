@@ -1,17 +1,17 @@
 # The directory Mix will write compiled artifacts to.
 /_build/
 
-# elixir language server, used by some editors
-/.elixir_ls/
-
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
 
-# Where 3rd-party dependencies like ExDoc output generated docs.
+# Where third-party dependencies like ExDoc output generated docs.
 /doc/
+
+# elixir language server, used by some editors
+/.elixir_ls/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
@@ -25,3 +25,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 vault_config_provider-*.tar
 
+# Temporary files, for example, from tests.
+/tmp/
